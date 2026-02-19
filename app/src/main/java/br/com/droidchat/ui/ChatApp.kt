@@ -19,6 +19,7 @@ fun ChatApp() {
     ) { innerPadding ->
         Box(
             modifier = Modifier
+                .padding(innerPadding)
                 .consumeWindowInsets(innerPadding)
                 .imePadding()
                 .fillMaxSize()
