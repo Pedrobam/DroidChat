@@ -12,9 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,8 +29,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.droidchat.R
+import br.com.droidchat.ui.components.AppDialog
 import br.com.droidchat.ui.components.PrimaryButton
 import br.com.droidchat.ui.components.ProfilePictureOptionsModalBottomSheet
 import br.com.droidchat.ui.components.ProfilePictureSelector
@@ -38,15 +43,37 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SignUpRoute(
-    viewModel: SignUpViewModel = viewModel {
-        SignUpViewModel(SignUpFormValidator())
-    }
+    viewModel: SignUpViewModel = hiltViewModel(),
+    onSignUpSuccess: () -> Unit
 ) {
     val formState = viewModel.formState
     SignUpScreen(
         formState,
         onFormEvent = viewModel::onEventForm
     )
+
+    if (formState.isSignedUp) {
+        AppDialog(
+            onDismissRequest = {
+                viewModel.successMessageShown()
+                onSignUpSuccess()
+            },
+            onConfirmButtonClick = {
+                viewModel.successMessageShown()
+                onSignUpSuccess()
+            },
+            message = stringResource(R.string.feature_sign_up_success),
+        )
+    }
+
+    formState.apiErrorMessageResId?.let { resId ->
+        AppDialog(
+            onDismissRequest = viewModel::errorMessageShown,
+            onConfirmButtonClick = viewModel::errorMessageShown,
+            message = stringResource(resId),
+            title = stringResource(R.string.common_generic_error_title)
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,7 +122,8 @@ fun SignUpScreen(
                                 onFormEvent(
                                     SignUpFormEvent.OpenProfilePictureOptionsModalBottomSheet
                                 )
-                            }
+                            },
+                        isCompressingImage = formState.isCompressingImage
                     )
 
                     Spacer(modifier = Modifier.height(30.dp))
@@ -186,7 +214,8 @@ fun SignUpScreen(
                         text = stringResource(R.string.feature_sign_up_button),
                         onClick = {
                             onFormEvent(SignUpFormEvent.Submit)
-                        }
+                        },
+                        isLoading = formState.isLoading
                     )
                 }
             }
