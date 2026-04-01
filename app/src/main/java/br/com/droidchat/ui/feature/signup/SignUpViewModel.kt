@@ -102,26 +102,26 @@ class SignUpViewModel @Inject constructor(
                 var profilePictureUri: Int? = 1
                 var errorWhenUploadingProfilePicture = false
 
-//                formState.profilePictureUri?.path?.let { path ->
-//                    authRepository.uploadProfilePicture(path)
-//                        .fold(
-//                            onSuccess = { image ->
-//                                profilePictureUri = image.id
-//                            },
-//                            onFailure = {
-//                                errorWhenUploadingProfilePicture = true
-//                            }
-//                        )
-//                }
-//
-//                if (errorWhenUploadingProfilePicture) {
-//                    formState = formState.copy(
-//                        isLoading = false,
-//                        profilePictureUri = null,
-//                        apiErrorMessageResId = R.string.error_message_profile_picture_uploading_failed
-//                    )
-//                    return@launch
-//                }
+                formState.profilePictureUri?.path?.let { path ->
+                    authRepository.uploadProfilePicture(path)
+                        .fold(
+                            onSuccess = { image ->
+                                profilePictureUri = image.id
+                            },
+                            onFailure = {
+                                errorWhenUploadingProfilePicture = true
+                            }
+                        )
+                }
+
+                if (errorWhenUploadingProfilePicture) {
+                    formState = formState.copy(
+                        isLoading = false,
+                        profilePictureUri = null,
+                        apiErrorMessageResId = R.string.error_message_profile_picture_uploading_failed
+                    )
+                    return@launch
+                }
 
                 authRepository.signUp(
                     createAccountDomain = CreateAccountDomain(
