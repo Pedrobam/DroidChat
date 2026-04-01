@@ -1,5 +1,7 @@
 package br.com.droidchat.ui.feature.signin
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,9 +13,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -29,17 +37,57 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.droidchat.R
+import br.com.droidchat.ui.components.AppDialog
 import br.com.droidchat.ui.components.PrimaryButton
 import br.com.droidchat.ui.components.PrimaryTextField
 import br.com.droidchat.ui.theme.BackgroundGradient
 import br.com.droidchat.ui.theme.DroidChatTheme
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun SignInRoute(
     viewModel: SignInViewModel = hiltViewModel(),
-    navigateToSignUp: () -> Unit
+    context: Context = LocalContext.current,
+    navigateToSignUp: () -> Unit,
+    navigateToHome: () -> Unit
 ) {
     val formState = viewModel.formState
+
+    val genericErrorMessage = stringResource(R.string.common_generic_error_message)
+    var showUnauthorizedError by remember { mutableStateOf(false) }
+
+    LaunchedEffect(true) {
+        viewModel.signInActionFlow.collectLatest { action ->
+            when(action) {
+                SignInViewModel.SignInAction.Success -> {
+                    navigateToHome()
+                }
+                is SignInViewModel.SignInAction.Error -> {
+                    when(action) {
+                        SignInViewModel.SignInAction.Error.GenericError -> {
+                            Toast.makeText(context, genericErrorMessage, Toast.LENGTH_SHORT).show()
+                        }
+                        SignInViewModel.SignInAction.Error.UnauthorizedError -> {
+                            showUnauthorizedError = true
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (showUnauthorizedError) {
+        AppDialog(
+            onDismissRequest = {
+                showUnauthorizedError = false
+            },
+            onConfirmButtonClick = {
+                showUnauthorizedError = false
+            },
+            message = stringResource(R.string.error_message_invalid_username_or_password),
+            title = stringResource(R.string.common_generic_error_title)
+        )
+    }
 
     SignInScreen(
         formState = formState,

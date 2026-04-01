@@ -1,7 +1,9 @@
 package br.com.droidchat.navigation
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -53,9 +55,13 @@ fun ChatNavHost() {
                 this.slidOutTo(AnimatedContentTransitionScope.SlideDirection.Left)
             }
         ) {
+            val context = LocalContext.current
             SignInRoute(
                 navigateToSignUp = {
                     navController.navigate(Route.SignUpRoute)
+                },
+                navigateToHome = {
+                    Toast.makeText(context, "Navigate to home", Toast.LENGTH_SHORT).show()
                 }
             )
         }
