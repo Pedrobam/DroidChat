@@ -1,6 +1,8 @@
 package br.com.droidchat.navigation
 
+import android.app.Activity
 import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -8,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
+import br.com.droidchat.MainActivity
 import br.com.droidchat.navigation.extension.slidInTo
 import br.com.droidchat.navigation.extension.slidOutTo
 import br.com.droidchat.ui.feature.signin.SignInRoute
@@ -32,6 +35,8 @@ sealed interface Route {
 @Composable
 fun ChatNavHost() {
     val navController = rememberNavController()
+    val activity = LocalActivity.current
+
     NavHost(navController = navController, startDestination = Route.SplashRoute) {
         composable<Route.SplashRoute> {
             SplashRoute(
@@ -44,6 +49,13 @@ fun ChatNavHost() {
                             }
                         }
                     )
+                },
+                onNavigateToMain = {
+//                    navController.navigate()
+                    Toast.makeText(navController.context, "Navigate to home", Toast.LENGTH_SHORT).show()
+                },
+                onCloseApp = {
+                    activity?.finish()
                 }
             )
         }
@@ -55,13 +67,12 @@ fun ChatNavHost() {
                 this.slidOutTo(AnimatedContentTransitionScope.SlideDirection.Left)
             }
         ) {
-            val context = LocalContext.current
             SignInRoute(
                 navigateToSignUp = {
                     navController.navigate(Route.SignUpRoute)
                 },
                 navigateToHome = {
-                    Toast.makeText(context, "Navigate to home", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(navController.context, "Navigate to home", Toast.LENGTH_SHORT).show()
                 }
             )
         }

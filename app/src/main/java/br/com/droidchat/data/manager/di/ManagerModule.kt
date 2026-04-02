@@ -1,7 +1,9 @@
 package br.com.droidchat.data.manager.di
 
-import br.com.droidchat.data.manager.SecureTokenManagerImpl
-import br.com.droidchat.data.manager.TokenManager
+import br.com.droidchat.data.manager.selfuser.SelfUserManager
+import br.com.droidchat.data.manager.selfuser.SelfUserManagerImpl
+import br.com.droidchat.data.manager.token.SecureTokenManagerImpl
+import br.com.droidchat.data.manager.token.TokenManager
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -15,5 +17,9 @@ interface ManagerModule {
     @Binds
     @Singleton
     fun bindTokenManager(tokenManagerImpl: SecureTokenManagerImpl): TokenManager
+
+    @Binds
+    @Singleton
+    fun bindSelfUserManager(selfUserManagerImpl: SelfUserManagerImpl): SelfUserManager
 
 }

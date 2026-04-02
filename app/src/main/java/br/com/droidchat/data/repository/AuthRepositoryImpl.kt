@@ -1,29 +1,32 @@
 package br.com.droidchat.data.repository
 
-import android.util.Log
 import br.com.droidchat.data.di.IoDispatcher
-import br.com.droidchat.data.manager.TokenManager
+import br.com.droidchat.data.manager.selfuser.SelfUserManager
+import br.com.droidchat.data.manager.token.TokenManager
 import br.com.droidchat.data.network.NetworkDataSource
 import br.com.droidchat.data.network.model.AuthRequest
 import br.com.droidchat.data.network.model.CreateAccountRequest
 import br.com.droidchat.model.CreateAccountDomain
 import br.com.droidchat.model.ImageDomain
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
     private val networkDataSource: NetworkDataSource,
     private val tokenManager: TokenManager,
+    private val selfUserManager: SelfUserManager,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : AuthRepository {
 
-    init {
-        GlobalScope.launch(ioDispatcher) {
-            Log.d("AuthRepositoryImpl", "init: ${tokenManager.accessToken.first()}")
+    override suspend fun getAccessToken(): String? {
+        return tokenManager.accessToken.firstOrNull()
+    }
+
+    override suspend fun clearAccessToken() {
+        withContext(ioDispatcher) {
+            tokenManager.clearAccessToken()
         }
     }
 
@@ -66,6 +69,20 @@ class AuthRepositoryImpl @Inject constructor(
                     name = imageResponse.name,
                     type = imageResponse.type,
                     url = imageResponse.url
+                )
+            }
+        }
+    }
+
+    override suspend fun authenticate(token: String): Result<Unit> {
+        return withContext(ioDispatcher) {
+            runCatching {
+                val userResponse = networkDataSource.authenticate(token)
+                selfUserManager.saveSelfUser(
+                    firstName = userResponse.firstName,
+                    lastName = userResponse.lastName,
+                    profilePictureUrl = userResponse.profilePictureUrl ?: "",
+                    username = userResponse.username
                 )
             }
         }
