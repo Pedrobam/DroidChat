@@ -1,40 +1,25 @@
 package br.com.droidchat.navigation
 
-import android.app.Activity
-import android.widget.Toast
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
-import br.com.droidchat.MainActivity
 import br.com.droidchat.navigation.extension.slidInTo
 import br.com.droidchat.navigation.extension.slidOutTo
+import br.com.droidchat.ui.feature.chats.ChatsRoute
+import br.com.droidchat.ui.feature.chats.navigateToChats
 import br.com.droidchat.ui.feature.signin.SignInRoute
 import br.com.droidchat.ui.feature.signup.SignUpRoute
 import br.com.droidchat.ui.feature.splash.SplashRoute
-import kotlinx.serialization.Serializable
-
-sealed interface Route {
-
-    @Serializable
-    object SplashRoute
-
-    @Serializable
-    object SignInRoute
-
-    @Serializable
-    object SignUpRoute
-}
-
-
 
 @Composable
-fun ChatNavHost() {
-    val navController = rememberNavController()
+fun ChatNavHost(
+    navigationState: DroidChatNavigationState
+) {
+    val navController = navigationState.navHostController
     val activity = LocalActivity.current
 
     NavHost(navController = navController, startDestination = Route.SplashRoute) {
@@ -51,8 +36,12 @@ fun ChatNavHost() {
                     )
                 },
                 onNavigateToMain = {
-//                    navController.navigate()
-                    Toast.makeText(navController.context, "Navigate to home", Toast.LENGTH_SHORT).show()
+                    navController.navigateToChats(
+                        navOptions = navOptions {
+                            popUpTo(Route.SplashRoute) {
+                                inclusive = true
+                            }
+                        })
                 },
                 onCloseApp = {
                     activity?.finish()
@@ -72,7 +61,12 @@ fun ChatNavHost() {
                     navController.navigate(Route.SignUpRoute)
                 },
                 navigateToHome = {
-                    Toast.makeText(navController.context, "Navigate to home", Toast.LENGTH_SHORT).show()
+                    navController.navigateToChats(
+                        navOptions = navOptions {
+                            popUpTo(Route.SignInRoute) {
+                                inclusive = true
+                            }
+                        })
                 }
             )
         }
@@ -89,6 +83,9 @@ fun ChatNavHost() {
                     navController.popBackStack()
                 }
             )
+        }
+        composable<Route.ChatsRoute> {
+            ChatsRoute()
         }
     }
 }

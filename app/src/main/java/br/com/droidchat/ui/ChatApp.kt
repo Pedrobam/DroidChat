@@ -9,9 +9,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import br.com.droidchat.navigation.ChatNavHost
+import br.com.droidchat.navigation.rememberDroidChatNavigationState
 
 @Composable
 fun ChatApp() {
+    val navigationState = rememberDroidChatNavigationState()
+
     Scaffold(
         bottomBar = {},
     ) { innerPadding ->
@@ -22,7 +25,9 @@ fun ChatApp() {
                 .imePadding()
                 .fillMaxSize()
         ) {
-            ChatNavHost()
+            ChatNavHost(
+                navigationState = navigationState
+            )
         }
     }
 }
