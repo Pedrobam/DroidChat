@@ -10,13 +10,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import br.com.droidchat.navigation.ChatNavHost
 import br.com.droidchat.navigation.rememberDroidChatNavigationState
+import br.com.droidchat.ui.components.BottomNavigationMenu
+import br.com.droidchat.ui.theme.Grey1
 
 @Composable
 fun ChatApp() {
     val navigationState = rememberDroidChatNavigationState()
 
     Scaffold(
-        bottomBar = {},
+        bottomBar = {
+            val topLevelDestinations = navigationState.topLevelDestinations.toTypedArray()
+            if (topLevelDestinations.contains(navigationState.currentTopLevelDestination)) {
+                BottomNavigationMenu(
+                    navigationState = navigationState
+                )
+            }
+        },
+        containerColor = Grey1
     ) { innerPadding ->
         Box(
             modifier = Modifier
