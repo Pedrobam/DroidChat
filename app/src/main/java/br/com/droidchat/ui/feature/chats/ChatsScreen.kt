@@ -24,12 +24,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.droidchat.R
 import br.com.droidchat.model.Chat
 import br.com.droidchat.ui.components.ChatItem
+import br.com.droidchat.ui.preview.ChatListPreviewParameterProvider
+import br.com.droidchat.ui.preview.ChatPreviewParameterProvider
 import br.com.droidchat.ui.theme.DroidChatTheme
 import br.com.droidchat.ui.theme.Grey1
 
@@ -135,11 +138,14 @@ private fun ChatsScreenPreviewLoading() {
 
 @Preview
 @Composable
-private fun ChatsScreenPreviewSuccess() {
+private fun ChatsScreenPreviewSuccess(
+    @PreviewParameter(ChatListPreviewParameterProvider::class)
+    chats: List<Chat>
+) {
     DroidChatTheme {
         ChatsScreen(
             chatsListUiState = ChatsViewModel.ChatsListUiState.Success(
-                listOf()
+                chats = chats
             )
         )
     }
