@@ -7,6 +7,7 @@ interface SelfUserManager {
     val selfUserFlow: Flow<SelfUser>
 
     suspend fun saveSelfUser(
+        id: Int,
         firstName: String,
         lastName: String,
         profilePictureUrl: String,

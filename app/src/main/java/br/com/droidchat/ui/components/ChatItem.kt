@@ -9,19 +9,32 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.constraintlayout.compose.Visibility
 import br.com.droidchat.R
+import br.com.droidchat.model.Chat
+import br.com.droidchat.model.User
+import br.com.droidchat.ui.preview.ChatPreviewParameterProvider
 import br.com.droidchat.ui.theme.DroidChatTheme
+import coil.compose.AsyncImage
 
 @Composable
-fun ChatItem(modifier: Modifier = Modifier) {
+fun ChatItem(
+    chat: Chat,
+    modifier: Modifier = Modifier
+) {
+    val receiver = remember(chat.members) {
+        chat.members.first { !it.self }
+    }
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
@@ -33,8 +46,11 @@ fun ChatItem(modifier: Modifier = Modifier) {
             lastTimeRef,
             unreadCountRef) = createRefs()
 
-        Image(
-            painter = painterResource(id = R.drawable.no_profile_image),
+        AsyncImage(
+            model = receiver.profilePictureUrl,
+            placeholder = painterResource(id = R.drawable.no_profile_image),
+            error = painterResource(id = R.drawable.no_profile_image),
+            fallback = painterResource(id = R.drawable.no_profile_image),
             contentDescription = null,
             modifier = Modifier
                 .clip(CircleShape)
@@ -47,7 +63,7 @@ fun ChatItem(modifier: Modifier = Modifier) {
         )
 
         Text(
-            text = "User Name",
+            text = receiver.firstName,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold,
@@ -62,7 +78,7 @@ fun ChatItem(modifier: Modifier = Modifier) {
         )
 
         Text(
-            text = "Last Message",
+            text = chat.lastMessage ?: "",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.constrainAs(lastMessageRef) {
@@ -75,7 +91,7 @@ fun ChatItem(modifier: Modifier = Modifier) {
         )
 
         Text(
-            text = "12:00",
+            text = chat.timestamp,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Medium,
@@ -83,12 +99,12 @@ fun ChatItem(modifier: Modifier = Modifier) {
                 width = Dimension.wrapContent
                 top.linkTo(firstNameRef.top)
                 end.linkTo(parent.end)
-                bottom.linkTo(unreadCountRef.top)
+                bottom.linkTo(firstNameRef.bottom)
             }
         )
 
         Text(
-            text = "2",
+            text = chat.unreadCount.toString(),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Medium,
@@ -101,6 +117,11 @@ fun ChatItem(modifier: Modifier = Modifier) {
                     top.linkTo(lastTimeRef.bottom)
                     end.linkTo(parent.end)
                     bottom.linkTo(lastMessageRef.bottom)
+                    visibility = if (chat.unreadCount > 0) {
+                        Visibility.Visible
+                    } else {
+                        Visibility.Gone
+                    }
                 }
         )
     }
@@ -108,8 +129,13 @@ fun ChatItem(modifier: Modifier = Modifier) {
 
 @Preview
 @Composable
-private fun ChatItemPreview() {
+private fun ChatItemPreview(
+    @PreviewParameter(ChatPreviewParameterProvider::class)
+    chat: Chat
+) {
     DroidChatTheme {
-        ChatItem()
+        ChatItem(
+            chat = chat
+        )
     }
 }
