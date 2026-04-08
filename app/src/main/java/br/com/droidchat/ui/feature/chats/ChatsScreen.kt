@@ -2,6 +2,7 @@ package br.com.droidchat.ui.feature.chats
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -31,6 +32,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.droidchat.R
 import br.com.droidchat.model.Chat
 import br.com.droidchat.ui.components.ChatItem
+import br.com.droidchat.ui.components.ChatItemError
+import br.com.droidchat.ui.components.ChatItemShimmer
 import br.com.droidchat.ui.preview.ChatListPreviewParameterProvider
 import br.com.droidchat.ui.preview.ChatPreviewParameterProvider
 import br.com.droidchat.ui.theme.DroidChatTheme
@@ -47,13 +50,17 @@ fun ChatsRoute(
      * */
     val chatsListUiState by viewModel.chatsListUiState.collectAsStateWithLifecycle()
 
-    ChatsScreen(chatsListUiState)
+    ChatsScreen(
+        chatsListUiState = chatsListUiState,
+        onTryAgainClick = viewModel::getChats
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatsScreen(
-    chatsListUiState: ChatsViewModel.ChatsListUiState
+    chatsListUiState: ChatsViewModel.ChatsListUiState,
+    onTryAgainClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -95,7 +102,20 @@ fun ChatsScreen(
         ) {
             when (chatsListUiState) {
                 ChatsViewModel.ChatsListUiState.Loading -> {
-                    Text(text = "Loading")
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        repeat(5) { index ->
+                            ChatItemShimmer()
+
+                            if (index < 4) {
+                                HorizontalDivider(
+                                    color = Grey1
+                                )
+                            }
+                        }
+                    }
                 }
                 is ChatsViewModel.ChatsListUiState.Success -> {
                     ChatsListContent(
@@ -103,7 +123,9 @@ fun ChatsScreen(
                     )
                 }
                 ChatsViewModel.ChatsListUiState.Error -> {
-
+                    ChatItemError(
+                        onTryAgainClick = onTryAgainClick
+                    )
                 }
             }
         }
@@ -131,7 +153,8 @@ fun ChatsListContent(chats: List<Chat>) {
 private fun ChatsScreenPreviewLoading() {
     DroidChatTheme {
         ChatsScreen(
-            chatsListUiState = ChatsViewModel.ChatsListUiState.Loading
+            chatsListUiState = ChatsViewModel.ChatsListUiState.Loading,
+            onTryAgainClick = {}
         )
     }
 }
@@ -146,7 +169,8 @@ private fun ChatsScreenPreviewSuccess(
         ChatsScreen(
             chatsListUiState = ChatsViewModel.ChatsListUiState.Success(
                 chats = chats
-            )
+            ),
+            onTryAgainClick = {}
         )
     }
 }
@@ -156,7 +180,8 @@ private fun ChatsScreenPreviewSuccess(
 private fun ChatsScreenPreviewError() {
     DroidChatTheme {
         ChatsScreen(
-            chatsListUiState = ChatsViewModel.ChatsListUiState.Error
+            chatsListUiState = ChatsViewModel.ChatsListUiState.Error,
+            onTryAgainClick = {}
         )
     }
 }
